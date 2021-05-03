@@ -1,6 +1,7 @@
 const sinon = require('sinon');
 const { expect } = require('chai');
 const dotenv = require('dotenv');
+const jwt = require('jsonwebtoken');
 
 const auth = require('./auth');
 const User = require('../models/user');
@@ -58,6 +59,25 @@ describe('Login', function() {
       auth.login(req, res);
       // Restore sandbox.
       sandbox.restore();
+    });
+  });
+});
+
+describe('Logout', function() {
+  describe('When a user tries to logout', function() {
+    it('should clean the token', function() {
+      let req = {};
+      let res = {
+        send: function(){ },
+        json: function(res){
+          expect(res.auth).to.equal(true);
+        },
+        status: function(responseStatus) {
+          expect(responseStatus).to.equal(200);
+          return this; 
+        }
+      };
+      auth.logout(req, res);
     });
   });
 });
