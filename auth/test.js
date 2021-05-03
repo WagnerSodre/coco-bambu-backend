@@ -81,3 +81,81 @@ describe('Logout', function() {
     });
   });
 });
+
+describe('verifyJWT', function() {
+  describe('When a user tries to login without a token', function() {
+    it('should give a no token error', function() {
+      let req = {
+        'headers': {}
+      };
+      let res = {
+        send: function(){ },
+        json: function(err){
+          expect(err.message).to.equal("No token provided");
+        },
+        status: function(responseStatus) {
+          expect(responseStatus).to.equal(401);
+          return this; 
+        }
+      };
+      let valid = false;
+      let next = function() {
+        valid = true;
+      }
+      auth.verifyJWT(req, res, next);
+      expect(valid).to.equal(false);
+    });
+  });
+
+  describe('When a user tries to login with a invalid token', function() {
+    it('should give a invalid token error', function() {
+      let req = {
+        'headers': {
+          'x-access-token': '1'
+        }
+      };
+      let res = {
+        send: function(){ },
+        json: function(err){
+          expect(err.message).to.equal("Failed to authenticate token");
+        },
+        status: function(responseStatus) {
+          expect(responseStatus).to.equal(500);
+          return this; 
+        }
+      };
+      let valid = false;
+      let next = function() {
+        valid = true;
+      }
+      auth.verifyJWT(req, res, next);
+      expect(valid).to.equal(false);
+    });
+  });
+  
+  describe('When a user tries to login with a valid token', function() {
+    it('should pass the validation', function() {
+      let id = 1;
+      const token = jwt.sign({ id }, process.env.SECRET, {
+        expiresIn: 300 // expires in 5min
+      });
+      req = {
+        'headers': {
+          'x-access-token': token
+        }
+      };
+      res = {
+        send: function(){ },
+        status: function() {
+            return this; 
+        }
+      };
+      let valid = false;
+      let next = function() {
+        valid = true;
+      }
+      auth.verifyJWT(req, res, next);
+      expect(valid).to.equal(true);
+    });
+  });
+});
