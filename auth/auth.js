@@ -17,3 +17,7 @@ exports.login = function(req, res){
     })
     .catch(() => res.status(401).json({message: 'Unauthorized'}));
 };
+
+exports.logout = function(req, res){
+    res.status(200).send({ auth: false, token: null }); 
+};
